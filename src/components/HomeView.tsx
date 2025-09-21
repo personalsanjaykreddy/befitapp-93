@@ -2,7 +2,6 @@ import { TrendingUp, Activity, Award, Calendar, Target, Flame, Footprints, Timer
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
-import MicroWorkouts from "./MicroWorkouts";
 import { CalorieTracker } from "@/utils/calorieTracker";
 
 interface HomeViewProps {
@@ -315,23 +314,30 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
         </div>
       </div>
 
-      {/* Micro Workouts Section */}
-      <div className="px-6 pb-4">
-        <MicroWorkouts onViewAllWorkouts={onNavigateToWorkoutPlan} />
-      </div>
-
-      {/* Special Features - Updated with new functionality */}
+      {/* Quick Options - Micro Workouts & Quick Food */}
       <div className="px-6 pb-6">
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Button 
             size="lg" 
             className="bg-gradient-primary text-primary-foreground h-14 shadow-selected hover:shadow-glow transition-all duration-slow hover:scale-110 active:scale-95"
-            onClick={onNavigateToMealPlan}
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-micro-workouts'))}
+          >
+            <Timer className="w-5 h-5 mr-2" />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Micro Workouts</span>
+              <span className="text-xs opacity-90">Quick 5-10 min sessions</span>
+            </div>
+          </Button>
+
+          <Button 
+            size="lg" 
+            className="bg-gradient-primary text-primary-foreground h-14 shadow-selected hover:shadow-glow transition-all duration-slow hover:scale-110 active:scale-95"
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-quick-food'))}
           >
             <Flame className="w-5 h-5 mr-2" />
             <div className="flex flex-col">
               <span className="text-sm font-medium">Quick Food</span>
-              <span className="text-xs opacity-90">Log meals & track nutrition</span>
+              <span className="text-xs opacity-90">Fast meal suggestions</span>
             </div>
           </Button>
         </div>

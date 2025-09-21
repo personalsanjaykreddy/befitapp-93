@@ -25,6 +25,7 @@ import LocalExperiences from "@/components/LocalExperiences";
 import AICoach from "@/components/AICoach";
 import ToDoSection from "@/components/ToDoSection";
 import QuickFood from "@/components/QuickFood";
+import MicroWorkoutsDetailView from "@/components/MicroWorkoutsDetailView";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<string>("home");
@@ -64,7 +65,8 @@ const Index = () => {
         'navigate-to-social': 'social',
         'navigate-to-local-experiences': 'local-experiences',
         'navigate-to-todo': 'todo',
-        'navigate-to-quick-food': 'quick-food'
+        'navigate-to-quick-food': 'quick-food',
+        'navigate-to-micro-workouts': 'micro-workouts'
       };
       
       const viewName = eventToViewMap[event.type];
@@ -78,7 +80,7 @@ const Index = () => {
       'navigate-to-workout-plan', 'navigate-to-meal-plan', 'open-search',
       'navigate-to-ai-coach', 'navigate-to-pose-detection', 'navigate-to-habits',
       'navigate-to-mental-health', 'navigate-to-social', 'navigate-to-local-experiences',
-      'navigate-to-todo', 'navigate-to-quick-food'
+      'navigate-to-todo', 'navigate-to-quick-food', 'navigate-to-micro-workouts'
     ];
     
     eventTypes.forEach(eventType => {
@@ -252,6 +254,10 @@ const Index = () => {
 
   if (currentView === "quick-food") {
     return <QuickFood onBack={goBack} />;
+  }
+
+  if (currentView === "micro-workouts") {
+    return <MicroWorkoutsDetailView onBack={goBack} />;
   }
 
   if (currentView === "search") {
