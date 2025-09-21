@@ -2,12 +2,14 @@ import { TrendingUp, Activity, Award, Calendar, Target, Flame, Footprints, Timer
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
-import WorkoutPopup from "./WorkoutPopup";
+import MicroWorkouts from "./MicroWorkouts";
+import { CalorieTracker } from "@/utils/calorieTracker";
 
 interface HomeViewProps {
   onNavigateToEnergyCalc?: () => void;
   onNavigateToNotes?: () => void;
   onNavigateToMealPlan?: () => void;
+  onNavigateToWorkoutPlan?: () => void;
 }
 
 interface DailyGoal {
@@ -16,8 +18,8 @@ interface DailyGoal {
   completed: boolean;
 }
 
-const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealPlan }: HomeViewProps) => {
-  const [showWorkoutPopup, setShowWorkoutPopup] = useState(false);
+const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealPlan, onNavigateToWorkoutPlan }: HomeViewProps) => {
+  const [calorieStats, setCalorieStats] = useState(() => CalorieTracker.getTodayStats());
   const [steps, setSteps] = useState(() => {
     const saved = localStorage.getItem('dailySteps');
     return saved ? parseInt(saved) : 2847;
@@ -31,6 +33,19 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
     const saved = localStorage.getItem('dailyProgress');
     return saved ? JSON.parse(saved) : { completed: 0, total: 0, date: new Date().toISOString().split('T')[0] };
   });
+
+  // Initialize calorie tracking on component mount
+  useEffect(() => {
+    CalorieTracker.resetIfNewDay();
+    setCalorieStats(CalorieTracker.getTodayStats());
+
+    const handleCalorieUpdate = (event: any) => {
+      setCalorieStats(CalorieTracker.getTodayStats());
+    };
+
+    window.addEventListener('calorieDataUpdated', handleCalorieUpdate);
+    return () => window.removeEventListener('calorieDataUpdated', handleCalorieUpdate);
+  }, []);
 
   // Weekly progress calculated from completed daily tasks
   const weeklyProgress = {
@@ -94,12 +109,18 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
     <div className="flex-1 bg-gradient-hero overflow-hidden">
       {/* Calories Circle - Smaller Size with Better Alignment */}
       <div className="px-6 pb-4">
-        <div className="bg-gradient-card border border-border/50 rounded-2xl p-4 shadow-lg hover:shadow-md transition-all duration-slow cursor-pointer group hover-highlight touch-highlight">
+        <div 
+          className="bg-gradient-card border border-border/50 rounded-2xl p-4 shadow-lg hover:shadow-md transition-all duration-slow cursor-pointer group hover-highlight touch-highlight"
+          onClick={onNavigateToEnergyCalc}
+        >
           <div className="text-center mb-3">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">Calories</h3>
+              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">Energy Balance</h3>
               <button 
-                onClick={onNavigateToEnergyCalc}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigateToEnergyCalc?.();
+                }}
                 className="text-xs px-2 py-1 bg-green-500/10 text-green-600 rounded-md hover:bg-green-500/20 transition-colors font-medium"
               >
                 update
@@ -128,14 +149,14 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
                   strokeWidth="1.5"
                   fill="transparent"
                   strokeDasharray={`${2 * Math.PI * 11}`}
-                  strokeDashoffset={`${2 * Math.PI * 11 * (1 - 0.72)}`}
+                  strokeDashoffset={`${2 * Math.PI * 11 * (1 - Math.min(calorieStats.consumed / calorieStats.goal, 1))}`}
                   className="transition-all duration-1000 ease-out"
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-base font-bold text-foreground leading-tight">1,840</div>
+                  <div className="text-base font-bold text-foreground leading-tight">{calorieStats.remaining}</div>
                   <div className="text-[10px] text-muted-foreground leading-tight">Remaining</div>
                 </div>
               </div>
@@ -146,18 +167,18 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="flex flex-col items-center gap-1">
               <Target className="w-4 h-4 text-primary" />
-              <div className="text-sm font-medium text-foreground">2,400</div>
-              <div className="text-xs text-muted-foreground">Base Goal</div>
+              <div className="text-sm font-medium text-foreground">{calorieStats.goal}</div>
+              <div className="text-xs text-muted-foreground">Daily Goal</div>
             </div>
             <div className="flex flex-col items-center gap-1">
               <Flame className="w-4 h-4 text-orange-500" />
-              <div className="text-sm font-medium text-foreground">560</div>
-              <div className="text-xs text-muted-foreground">Food</div>
+              <div className="text-sm font-medium text-foreground">{calorieStats.consumed}</div>
+              <div className="text-xs text-muted-foreground">Consumed</div>
             </div>
             <div className="flex flex-col items-center gap-1">
               <Zap className="w-4 h-4 text-green-500" />
-              <div className="text-sm font-medium text-foreground">0</div>
-              <div className="text-xs text-muted-foreground">Exercise</div>
+              <div className="text-sm font-medium text-foreground">{calorieStats.burned}</div>
+              <div className="text-xs text-muted-foreground">Burned</div>
             </div>
           </div>
         </div>
@@ -294,41 +315,27 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
         </div>
       </div>
 
+      {/* Micro Workouts Section */}
+      <div className="px-6 pb-4">
+        <MicroWorkouts onViewAllWorkouts={onNavigateToWorkoutPlan} />
+      </div>
+
       {/* Special Features - Updated with new functionality */}
       <div className="px-6 pb-6">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <Button 
             size="lg" 
             className="bg-gradient-primary text-primary-foreground h-14 shadow-selected hover:shadow-glow transition-all duration-slow hover:scale-110 active:scale-95"
             onClick={onNavigateToMealPlan}
           >
             <Flame className="w-5 h-5 mr-2" />
-            {(() => {
-              const hour = new Date().getHours();
-              if (hour >= 5 && hour < 11) return "Quick Food";
-              if (hour >= 11 && hour < 16) return "Quick Food";
-              if (hour >= 16 && hour < 19) return "Quick Food";
-              return "Quick Food";
-            })()}
-          </Button>
-          <Button
-            size="lg"
-            className="bg-gradient-primary text-primary-foreground h-14 shadow-selected hover:shadow-glow transition-all duration-slow hover:scale-110 active:scale-95"
-            onClick={() => setShowWorkoutPopup(true)}
-          >
-            <Timer className="w-5 h-5 mr-2" />
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Daily Tiny</span>
-              <span className="text-xs opacity-90">Tasks</span>
+              <span className="text-sm font-medium">Quick Food</span>
+              <span className="text-xs opacity-90">Log meals & track nutrition</span>
             </div>
           </Button>
         </div>
       </div>
-
-      {/* Workout Progress Popup */}
-      {showWorkoutPopup && (
-        <WorkoutPopup onClose={() => setShowWorkoutPopup(false)} />
-      )}
     </div>
   );
 };

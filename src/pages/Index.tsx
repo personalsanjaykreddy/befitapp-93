@@ -289,11 +289,12 @@ const Index = () => {
           
           {/* Home View - Primary Canvas */}
           <div className="flex-shrink-0">
-            <HomeView 
-              onNavigateToEnergyCalc={() => navigateToView("energy-calc")}
-              onNavigateToNotes={() => navigateToView("notepad")}
-              onNavigateToMealPlan={() => navigateToView("meal-plan")}
-            />
+          <HomeView 
+            onNavigateToEnergyCalc={() => navigateToView("energy-calc")}
+            onNavigateToNotes={() => navigateToView("notepad")}
+            onNavigateToMealPlan={() => navigateToView("meal-plan")}
+            onNavigateToWorkoutPlan={() => navigateToView("workout-plan")}
+          />
           </div>
           
           {/* Bento Grid Categories */}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Zap, Activity, Utensils, Target, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { CalorieTracker } from "@/utils/calorieTracker";
 
 interface EnergyCalculatorProps {
   onBack: () => void;
@@ -34,6 +35,24 @@ const EnergyCalculator = ({ onBack }: EnergyCalculatorProps) => {
   const [selectedWorkout, setSelectedWorkout] = useState<string>("");
   const [workoutDuration, setWorkoutDuration] = useState<number>(30);
 
+  // Load existing data on component mount
+  useEffect(() => {
+    const recentFoods = CalorieTracker.getRecentFoods();
+    const recentActivities = CalorieTracker.getRecentActivities();
+    
+    setConsumedFoods(recentFoods.map(food => ({
+      name: food.name,
+      calories: food.calories,
+      protein: 0, carbs: 0, fat: 0, portion: "1 serving"
+    })));
+    
+    setWorkoutActivities(recentActivities.map(activity => ({
+      name: activity.name,
+      caloriesPerMinute: activity.calories / activity.duration,
+      duration: activity.duration
+    })));
+  }, []);
+
   const indianFoods: FoodItem[] = [
     { name: "Rice (1 cup)", calories: 205, protein: 4, carbs: 45, fat: 0.5, portion: "1 cup" },
     { name: "Roti (1 piece)", calories: 70, protein: 3, carbs: 15, fat: 0.5, portion: "1 piece" },
@@ -60,6 +79,7 @@ const EnergyCalculator = ({ onBack }: EnergyCalculatorProps) => {
 
   const addFood = (food: FoodItem) => {
     setConsumedFoods(prev => [...prev, food]);
+    CalorieTracker.addFood(food.name, food.calories);
     setSelectedFood("");
   };
 
@@ -71,11 +91,13 @@ const EnergyCalculator = ({ onBack }: EnergyCalculatorProps) => {
     if (!selectedWorkout) return;
     const workout = workoutTypes.find(w => w.name === selectedWorkout);
     if (workout) {
+      const totalCalories = workout.caloriesPerMinute * workoutDuration;
       setWorkoutActivities(prev => [...prev, {
         name: workout.name,
         caloriesPerMinute: workout.caloriesPerMinute,
         duration: workoutDuration
       }]);
+      CalorieTracker.addActivity(workout.name, totalCalories, workoutDuration);
       setSelectedWorkout("");
       setWorkoutDuration(30);
     }
