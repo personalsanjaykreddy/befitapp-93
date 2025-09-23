@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Heart, Smile, Moon, Headphones, BookOpen, Users, Calendar, Frown, Meh, SmilePlus } from "lucide-react";
+import { Brain, Heart, Smile, Moon, Headphones, BookOpen, Users, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,11 +53,11 @@ const MentalHealthHub = ({ onBack }: MentalHealthHubProps) => {
   ];
 
   const moodOptions = [
-    { icon: Frown, label: "Very Sad", value: 1, color: "text-destructive" },
-    { icon: Frown, label: "Sad", value: 3, color: "text-warning" },
-    { icon: Meh, label: "Neutral", value: 5, color: "text-muted-foreground" },
-    { icon: Smile, label: "Happy", value: 7, color: "text-success" },
-    { icon: SmilePlus, label: "Very Happy", value: 9, color: "text-primary" }
+    { emoji: "😢", label: "Very Sad", value: 1 },
+    { emoji: "😔", label: "Sad", value: 3 },
+    { emoji: "😐", label: "Neutral", value: 5 },
+    { emoji: "😊", label: "Happy", value: 7 },
+    { emoji: "😄", label: "Very Happy", value: 9 }
   ];
 
   return (
@@ -83,23 +83,20 @@ const MentalHealthHub = ({ onBack }: MentalHealthHubProps) => {
           </h3>
           
           <div className="flex justify-between items-center mb-4">
-            {moodOptions.map((mood) => {
-              const IconComponent = mood.icon;
-              return (
-                <button
-                  key={mood.value}
-                  onClick={() => setMoodScore(mood.value)}
-                  className={`flex flex-col items-center p-2 rounded-lg transition-all duration-normal hover:scale-110 ${
-                    moodScore === mood.value 
-                      ? 'bg-primary/20 scale-110' 
-                      : 'hover:bg-accent/50'
-                  }`}
-                >
-                  <IconComponent className={`w-6 h-6 mb-1 ${moodScore === mood.value ? 'text-primary' : mood.color}`} />
-                  <span className="text-xs text-muted-foreground">{mood.label}</span>
-                </button>
-              );
-            })}
+            {moodOptions.map((mood) => (
+              <button
+                key={mood.value}
+                onClick={() => setMoodScore(mood.value)}
+                className={`flex flex-col items-center p-2 rounded-lg transition-all duration-normal hover:scale-110 ${
+                  moodScore === mood.value 
+                    ? 'bg-primary/20 scale-110' 
+                    : 'hover:bg-accent/50'
+                }`}
+              >
+                <span className="text-2xl mb-1">{mood.emoji}</span>
+                <span className="text-xs text-muted-foreground">{mood.label}</span>
+              </button>
+            ))}
           </div>
           
           <div className="text-center">
