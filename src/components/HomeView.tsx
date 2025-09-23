@@ -230,6 +230,15 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Today Goals</h3>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent('navigate-to-todo'));
+                }}
+                className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium"
+              >
+                update
+              </button>
             </div>
             <span className="text-sm text-muted-foreground">{dayName}, {dateString}</span>
           </div>
@@ -247,7 +256,7 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
             </div>
           )}
           
-          {/* Show only 3 goals */}
+          {/* Show 2 quick tasks with names */}
           <div className="space-y-2 mb-4">
             {dailyProgress.total === 0 ? (
               <div 
@@ -264,12 +273,24 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
                 className="cursor-pointer hover:bg-background/50 rounded transition-colors p-2"
                 onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-todo'))}
               >
-                <div className="text-center mb-2">
-                  <span className="text-lg font-bold text-primary">{dailyProgress.completed}/{Math.min(dailyProgress.total, 3)}</span>
-                  <span className="text-sm text-muted-foreground ml-1">quick tasks</span>
+                {/* Show first 2 tasks with checkboxes */}
+                <div className="space-y-2 mb-2">
+                  {(() => {
+                    const todayTasks = JSON.parse(localStorage.getItem('weeklyGoals') || '{}')[new Date().toISOString().split('T')[0]] || [];
+                    return todayTasks.slice(0, 2).map((task: any, index: number) => (
+                      <div key={task.id} className="flex items-center gap-2 text-sm">
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${task.completed ? 'bg-success border-success text-white' : 'border-muted-foreground'}`}>
+                          {task.completed && <Check className="w-3 h-3" />}
+                        </div>
+                        <span className={task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}>
+                          {task.text}
+                        </span>
+                      </div>
+                    ));
+                  })()}
                 </div>
-                {dailyProgress.total > 3 && (
-                  <p className="text-xs text-muted-foreground text-center">+{dailyProgress.total - 3} more in full view</p>
+                {dailyProgress.total > 2 && (
+                  <p className="text-xs text-muted-foreground text-center">+{dailyProgress.total - 2} more tasks inside</p>
                 )}
               </div>
             )}
@@ -320,13 +341,10 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
           <Button 
             size="lg" 
             className="bg-gradient-primary text-primary-foreground h-14 shadow-selected hover:shadow-glow transition-all duration-slow hover:scale-110 active:scale-95"
-            onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-micro-workouts'))}
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-workout-plan'))}
           >
             <Timer className="w-5 h-5 mr-2" />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Micro Workouts</span>
-              <span className="text-xs opacity-90">Quick 5-10 min sessions</span>
-            </div>
+            <span className="text-sm font-medium">Workout Plan</span>
           </Button>
 
           <Button 
@@ -335,10 +353,7 @@ const HomeView = ({ onNavigateToEnergyCalc, onNavigateToNotes, onNavigateToMealP
             onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-quick-food'))}
           >
             <Flame className="w-5 h-5 mr-2" />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Quick Food</span>
-              <span className="text-xs opacity-90">Fast meal suggestions</span>
-            </div>
+            <span className="text-sm font-medium">Quick Food</span>
           </Button>
         </div>
       </div>

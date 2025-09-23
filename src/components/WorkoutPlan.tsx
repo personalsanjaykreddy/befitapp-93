@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Clock, MapPin, Dumbbell, Heart, Zap, Target, CheckCircle, Flower2 } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Dumbbell, Heart, Zap, Target, CheckCircle, Flower2, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import WorkoutPopup from "./WorkoutPopup";
 
 interface WorkoutPlanProps {
   onBack: () => void;
@@ -33,6 +34,13 @@ interface Exercise {
 
 const workoutTypes: WorkoutType[] = [
   {
+    id: "micro",
+    name: "Micro Workouts",
+    description: "Quick 5-10 minute sessions",
+    icon: Zap,
+    gradient: "bg-gradient-to-br from-primary to-primary-glow"
+  },
+  {
     id: "yoga",
     name: "Yoga",
     description: "Flexibility, balance, and mindfulness",
@@ -44,7 +52,7 @@ const workoutTypes: WorkoutType[] = [
     name: "Strength Training",
     description: "Build muscle and increase power",
     icon: Dumbbell,
-    gradient: "bg-gradient-to-br from-primary to-primary-glow"
+    gradient: "bg-gradient-to-br from-blue-500 to-blue-600"
   },
   {
     id: "cardio",
@@ -57,7 +65,7 @@ const workoutTypes: WorkoutType[] = [
     id: "hiit",
     name: "HIIT",
     description: "High-intensity interval training",
-    icon: Zap,
+    icon: Target,
     gradient: "bg-gradient-to-br from-warning to-orange-400"
   },
   {
@@ -69,7 +77,7 @@ const workoutTypes: WorkoutType[] = [
   }
 ];
 
-const durations = [15, 30, 45, 60, 90];
+const durations = [5, 10, 15, 30, 45, 60, 90];
 const locations = ["Home", "Gym", "Outdoor", "Hotel/Travel"];
 
 const WorkoutPlan = ({ onBack }: WorkoutPlanProps) => {
@@ -91,6 +99,7 @@ const WorkoutPlan = ({ onBack }: WorkoutPlanProps) => {
     const saved = localStorage.getItem('workoutPlanGenerated');
     return saved ? JSON.parse(saved) : [];
   });
+  const [showWorkoutPopup, setShowWorkoutPopup] = useState(false);
 
   // Save state to localStorage
   useEffect(() => {
@@ -115,6 +124,26 @@ const WorkoutPlan = ({ onBack }: WorkoutPlanProps) => {
 
   const generateWorkoutPlan = (data: WorkoutPlanData): Exercise[] => {
     const plans = {
+      micro: {
+        home: [
+          { name: "Morning Yoga Flow", duration: "8min" },
+          { name: "Desk Break HIIT", duration: "5min" },
+          { name: "Cardio Burst", duration: "7min" },
+          { name: "Flexibility Flow", duration: "6min" }
+        ],
+        gym: [
+          { name: "Quick Strength Circuit", duration: "10min" },
+          { name: "HIIT Cardio Burst", duration: "8min" },
+          { name: "Core Power Session", duration: "6min" },
+          { name: "Stretching Flow", duration: "5min" }
+        ],
+        outdoor: [
+          { name: "Park Bench Workout", duration: "10min" },
+          { name: "Running Intervals", duration: "8min" },
+          { name: "Bodyweight Circuit", duration: "7min" },
+          { name: "Nature Yoga", duration: "9min" }
+        ]
+      },
       yoga: {
         home: [
           { name: "Sun Salutation A", sets: 3, reps: "5 rounds", rest: "30s" },
@@ -478,9 +507,10 @@ const WorkoutPlan = ({ onBack }: WorkoutPlanProps) => {
                 Create New Plan
               </Button>
               <Button 
-                onClick={onBack}
+                onClick={() => setShowWorkoutPopup(true)}
                 className="flex-1 bg-gradient-primary hover:shadow-glow transition-all duration-normal"
               >
+                <Timer className="w-4 h-4 mr-2" />
                 Start Workout
               </Button>
             </div>
@@ -519,6 +549,22 @@ const WorkoutPlan = ({ onBack }: WorkoutPlanProps) => {
       <div className="flex-1 p-4 overflow-y-auto">
         {renderStepContent()}
       </div>
+
+      {/* Workout Popup */}
+      {showWorkoutPopup && (
+        <WorkoutPopup
+          workout={{
+            id: `${selectedType}-${selectedDuration}`,
+            name: `${workoutTypes.find(t => t.id === selectedType)?.name || 'Custom'} Workout`,
+            duration: selectedDuration,
+            exercises: generatedPlan.map(exercise => ({
+              name: exercise.name,
+              duration: exercise.duration ? parseInt(exercise.duration.replace(/\D/g, '')) * 60 : 300 // Convert to seconds
+            }))
+          }}
+          onClose={() => setShowWorkoutPopup(false)}
+        />
+      )}
     </div>
   );
 };

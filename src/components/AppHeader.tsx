@@ -45,7 +45,7 @@ const AppHeader = ({ userName, onOpenProfile }: AppHeaderProps) => {
             {/* Greeting with name - 3 lines beside profile */}
             <div className="flex flex-col justify-center h-8">
               <div className="text-xs font-medium text-foreground leading-none">Good</div>
-              <div className="text-xs font-medium text-foreground leading-none">{greeting.split(' ')[1]}</div>
+              <div className="text-xs font-medium text-foreground leading-none">{greeting.split(' ')[1]}!</div>
               {displayName && <div className="text-xs font-medium text-foreground leading-none">{displayName}</div>}
             </div>
           </div>

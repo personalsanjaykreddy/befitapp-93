@@ -26,7 +26,6 @@ const WorkoutPopup = ({ workout, onClose }: WorkoutPopupProps) => {
   const [currentExercise, setCurrentExercise] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // Use workout data or fallback to default exercises
   const exercises = workout?.exercises || [
     { name: "Wall Push-ups", duration: 120 },
     { name: "Desk Stretches", duration: 180 },
@@ -37,6 +36,7 @@ const WorkoutPopup = ({ workout, onClose }: WorkoutPopupProps) => {
   const currentExerciseData = exercises[currentExercise];
   const targetTime = currentExerciseData.duration;
   const workoutName = workout?.name || "Quick Workout";
+  const totalWorkoutDuration = exercises.reduce((sum, ex) => sum + ex.duration, 0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -101,6 +101,9 @@ const WorkoutPopup = ({ workout, onClose }: WorkoutPopupProps) => {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {formatTime(Math.floor(totalWorkoutDuration / 60))} min total
+            </span>
             {!isCompleted && (
               <Button
                 variant="ghost"
