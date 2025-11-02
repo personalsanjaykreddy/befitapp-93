@@ -4,25 +4,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface WebsiteHeaderProps {
   userName?: string;
-  onOpenProfile?: () => void;
-  currentView: string;
-  onNavigate: (view: string) => void;
 }
 
-const WebsiteHeader = ({ userName, onOpenProfile, currentView, onNavigate }: WebsiteHeaderProps) => {
+const WebsiteHeader = ({ userName }: WebsiteHeaderProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const greeting = getTimeBasedGreeting();
   const displayName = userName ? getDisplayName(userName) : undefined;
   const userPhoto = localStorage.getItem('userPhoto');
 
   const navItems = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "workout-plan", label: "Workouts", icon: Dumbbell },
-    { id: "meal-plan", label: "Meals", icon: Utensils },
-    { id: "mental-health", label: "Mental Health", icon: Brain },
-    { id: "others", label: "More", icon: MoreHorizontal }
+    { id: "/", label: "Home", icon: Home },
+    { id: "/workouts", label: "Workouts", icon: Dumbbell },
+    { id: "/meals", label: "Meals", icon: Utensils },
+    { id: "/mental-health", label: "Mental Health", icon: Brain },
+    { id: "/more", label: "More", icon: MoreHorizontal }
   ];
 
   return (
@@ -48,13 +48,13 @@ const WebsiteHeader = ({ userName, onOpenProfile, currentView, onNavigate }: Web
           <nav className="hidden md:flex items-center gap-2">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentView === item.id;
+              const isActive = location.pathname === item.id;
               
               return (
                 <Button
                   key={item.id}
                   variant={isActive ? "default" : "ghost"}
-                  onClick={() => onNavigate(item.id)}
+                  onClick={() => navigate(item.id)}
                   className={cn(
                     "gap-2 transition-all duration-normal",
                     isActive && "bg-gradient-primary text-primary-foreground shadow-md"
@@ -75,9 +75,7 @@ const WebsiteHeader = ({ userName, onOpenProfile, currentView, onNavigate }: Web
               <Input
                 placeholder="Search..."
                 className="pl-10 h-9 bg-card/50 border-border/50 rounded-lg text-sm cursor-pointer hover:shadow-md transition-all"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('open-search'));
-                }}
+                onClick={() => navigate('/search')}
                 readOnly
               />
             </div>
@@ -86,9 +84,7 @@ const WebsiteHeader = ({ userName, onOpenProfile, currentView, onNavigate }: Web
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('open-search'));
-              }}
+              onClick={() => navigate('/search')}
               className="lg:hidden"
             >
               <Search className="w-5 h-5" />
@@ -98,7 +94,7 @@ const WebsiteHeader = ({ userName, onOpenProfile, currentView, onNavigate }: Web
             <Button
               variant="ghost"
               size="icon"
-              onClick={onOpenProfile}
+              onClick={() => navigate('/profile')}
               className="hover:scale-110 transition-transform duration-normal"
             >
               <Avatar className="w-8 h-8">
@@ -115,14 +111,14 @@ const WebsiteHeader = ({ userName, onOpenProfile, currentView, onNavigate }: Web
         <nav className="md:hidden flex items-center gap-2 mt-4 overflow-x-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentView === item.id;
+            const isActive = location.pathname === item.id;
             
             return (
               <Button
                 key={item.id}
                 variant={isActive ? "default" : "ghost"}
                 size="sm"
-                onClick={() => onNavigate(item.id)}
+                onClick={() => navigate(item.id)}
                 className={cn(
                   "gap-2 flex-shrink-0",
                   isActive && "bg-gradient-primary text-primary-foreground"
