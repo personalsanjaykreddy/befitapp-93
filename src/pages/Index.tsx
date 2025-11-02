@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import AppHeader from "@/components/AppHeader";
+import WebsiteHeader from "@/components/WebsiteHeader";
 import HomeView from "@/components/HomeView";
 import BentoGrid from "@/components/BentoGrid";
-import BottomNavigation from "@/components/BottomNavigation";
 import WorkoutPlan from "@/components/WorkoutPlan";
 import MealPlan from "@/components/MealPlan";
 import EnergyCalculator from "@/components/EnergyCalculator";
@@ -126,24 +125,12 @@ const Index = () => {
     }
   };
 
-  const handleBottomNavigation = (section: string) => {
-    switch (section) {
-      case "home":
-        setCurrentView("home");
-        setNavigationHistory(["home"]);
-        break;
-      case "workouts":
-        navigateToView("workout-plan");
-        break;
-      case "meals":
-        navigateToView("meal-plan");
-        break;
-      case "mental-health":
-        navigateToView("mental-health");
-        break;
-      case "others":
-        navigateToView("others");
-        break;
+  const handleNavigation = (view: string) => {
+    if (view === "home") {
+      setCurrentView("home");
+      setNavigationHistory(["home"]);
+    } else {
+      navigateToView(view);
     }
   };
 
@@ -269,7 +256,7 @@ const Index = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-hero overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-hero">
       {/* Optional Profile Setup Modal */}
       {showProfileSetup && (
         <UserProfileSetup 
@@ -278,41 +265,42 @@ const Index = () => {
         />
       )}
       
-      {/* Main Content Area - Scrollable with Header Inside */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden home-scroll-container">
-        <div className="flex flex-col min-h-full">
-          {/* App Header with Greeting and Search - Now scrolls with content */}
-          <AppHeader 
-            userName={userProfile?.name} 
-            onOpenProfile={() => navigateToView("profile")}
-          />
-          
+      {/* Website Header with Navigation */}
+      <WebsiteHeader 
+        userName={userProfile?.name}
+        onOpenProfile={() => navigateToView("profile")}
+        currentView={currentView}
+        onNavigate={handleNavigation}
+      />
+      
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Home View - Primary Canvas */}
-          <div className="flex-shrink-0">
-          <HomeView 
-            onNavigateToEnergyCalc={() => navigateToView("energy-calc")}
-            onNavigateToNotes={() => navigateToView("notepad")}
-            onNavigateToMealPlan={() => navigateToView("meal-plan")}
-            onNavigateToWorkoutPlan={() => navigateToView("workout-plan")}
-          />
+          <div className="py-6">
+            <HomeView 
+              onNavigateToEnergyCalc={() => navigateToView("energy-calc")}
+              onNavigateToNotes={() => navigateToView("notepad")}
+              onNavigateToMealPlan={() => navigateToView("meal-plan")}
+              onNavigateToWorkoutPlan={() => navigateToView("workout-plan")}
+            />
           </div>
           
           {/* Bento Grid Categories */}
-          <div className="flex-shrink-0 bg-background/95 backdrop-blur-md border-t border-border/50">
-            <BentoGrid 
-              onNavigateToWorkoutPlan={() => navigateToView("workout-plan")}
-              onNavigateToMealPlan={() => navigateToView("meal-plan")}
-              onNavigateToEnergyCalc={() => navigateToView("energy-calc")}
-              onNavigateToProfile={() => navigateToView("profile")}
-              onNavigateToNotepad={() => navigateToView("notepad")}
-              onNavigateToAnalytics={() => navigateToView("analytics")}
-            />
+          <div className="bg-background/95 backdrop-blur-md border-t border-border/50 py-6">
+            <div className="px-6">
+              <BentoGrid 
+                onNavigateToWorkoutPlan={() => navigateToView("workout-plan")}
+                onNavigateToMealPlan={() => navigateToView("meal-plan")}
+                onNavigateToEnergyCalc={() => navigateToView("energy-calc")}
+                onNavigateToProfile={() => navigateToView("profile")}
+                onNavigateToNotepad={() => navigateToView("notepad")}
+                onNavigateToAnalytics={() => navigateToView("analytics")}
+              />
+            </div>
           </div>
         </div>
       </div>
-      
-      {/* Bottom Navigation */}
-      <BottomNavigation onNavigate={handleBottomNavigation} />
     </div>
   );
 };
